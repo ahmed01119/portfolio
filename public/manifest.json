@@ -1,0 +1,21 @@
+{
+  "name": "Ahmed Mostafa | Flutter Developer Portfolio",
+  "short_name": "Ahmed.dev",
+  "description": "Flutter Developer specializing in building scalable cross-platform mobile applications.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1523",
+  "theme_color": "#0B1523",
+  "icons": [
+    {
+      "src": "/icon-dark-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

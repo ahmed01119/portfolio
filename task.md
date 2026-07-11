@@ -1,0 +1,10 @@
+- `[x]` Configure SEO Meta Tags and standard production files (manifest, robots, sitemap)
+- `[x]` Brighten theme background and add layered radial gradient in globals.css
+- `[x]` Update site-navbar targeting section links correctly
+- `[x]` Refactor hero-section with real links, direct CV download, spring hover styles, and semantic HTML
+- `[x]` Update phone-mockup with mouse-reactive glare shift and ambient glow
+- `[x]` Update about-section with profile.jpg, glass frame, soft glow, float, and parallax tilt
+- `[ ]` Update projects-section with correct GitHub URLs, target="_blank", and semantic HTML
+- `[ ]` Enhance tech-stack-section with organic hover and smooth entrance transitions
+- `[ ]` Update contact-section and build premium footer
+- `[ ]` Verify Next.js build and test responsiveness
