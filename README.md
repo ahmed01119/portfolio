@@ -10,18 +10,18 @@ This project has an integrated Contact Form powered by [EmailJS](https://www.ema
 
 To configure the email service locally:
 
-1. Copy the example environment variables file to create a local configuration file:
+1. Copy the example environment variables file to create a configuration file:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
-2. Open `.env.local` and fill in your EmailJS credentials:
+2. Open `.env` and fill in your EmailJS credentials:
    ```env
    NEXT_PUBLIC_EMAILJS_SERVICE_ID=your_service_id_here
    NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=your_template_id_here
    NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key_here
    ```
 
-*Note: `.env.local` is whitelisted in `.gitignore` to prevent committing your production credentials to Git.*
+*Note: `.env` is whitelisted in `.gitignore` to prevent committing your production credentials to Git.*
 
 ### Production Deployment (e.g., Vercel)
 
