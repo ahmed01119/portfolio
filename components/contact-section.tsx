@@ -1,43 +1,164 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Sparkles, Mail, Send, MapPin, Globe, CheckCircle2, ArrowRight } from "lucide-react"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Sparkles, Mail, Send, MapPin, Globe, CheckCircle2, ArrowRight, AlertCircle, X, Loader2 } from "lucide-react"
 import { GithubIcon, LinkedinIcon, GmailIcon, TelegramIcon } from "@/components/social-icons"
+import emailjs from "@emailjs/browser"
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const rawSocials = JSON.parse(process.env.NEXT_PUBLIC_SOCIALS_DATA || "[]");
+const rawSocials = JSON.parse(process.env.NEXT_PUBLIC_SOCIALS_DATA || "[]")
 
 const iconMap: Record<string, any> = {
   GithubIcon,
   LinkedinIcon,
   GmailIcon,
   TelegramIcon
-};
+}
 
 const socials = rawSocials.map((s: any) => ({
   ...s,
   icon: iconMap[s.iconName] || GithubIcon
-}));
+}))
 
 export function ContactSection() {
-  const [formState, setFormState] = useState({ name: "", email: "", message: "" })
+  const [formState, setFormState] = useState({ name: "", email: "", subject: "", message: "", honeypot: "" })
+  const [errors, setErrors] = useState({ name: "", email: "", message: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | null }>({
+    message: "",
+    type: null,
+  })
+
+  useEffect(() => {
+    if (toast.type) {
+      const timer = setTimeout(() => {
+        setToast({ message: "", type: null })
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [toast.type])
+
+  const getCooldownRemaining = () => {
+    if (typeof window === "undefined") return 0
+    const lastSubmit = localStorage.getItem("emailjs_last_submit")
+    if (!lastSubmit) return 0
+    const elapsed = Date.now() - parseInt(lastSubmit, 10)
+    const remaining = 60000 - elapsed
+    return remaining > 0 ? Math.ceil(remaining / 1000) : 0
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormState((prev) => ({ ...prev, [name]: value }))
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }))
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors = { name: "", email: "", message: "" }
+    let isValid = true
+
+    if (!formState.name.trim()) {
+      newErrors.name = "Full Name is required."
+      isValid = false
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!formState.email.trim()) {
+      newErrors.email = "Email Address is required."
+      isValid = false
+    } else if (!emailRegex.test(formState.email)) {
+      newErrors.email = "Please enter a valid email address."
+      isValid = false
+    }
+
+    if (!formState.message.trim()) {
+      newErrors.message = "Message is required."
+      isValid = false
+    } else if (formState.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters long."
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (isSubmitting) return
+
+    const cooldown = getCooldownRemaining()
+    if (cooldown > 0) {
+      setToast({
+        message: `Please wait ${cooldown} seconds before sending another message.`,
+        type: "error",
+      })
+      return
+    }
+
+    if (!validateForm()) return
+
     setIsSubmitting(true)
-    
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    
-    setIsSubmitting(false)
-    setIsSuccess(true)
-    setFormState({ name: "", email: "", message: "" })
-    
-    setTimeout(() => setIsSuccess(false), 4000)
+
+    if (formState.honeypot) {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      setIsSubmitting(false)
+      setToast({
+        message: "Your message has been sent successfully.",
+        type: "success",
+      })
+      setFormState({ name: "", email: "", subject: "", message: "", honeypot: "" })
+      return
+    }
+
+    try {
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+
+      if (!serviceId || !templateId || !publicKey) {
+        throw new Error("Missing EmailJS environment configuration.")
+      }
+
+      const templateParams = {
+        from_name: formState.name,
+        from_email: formState.email,
+        reply_to: formState.email,
+        subject: formState.subject || `Portfolio Inquiry from ${formState.name}`,
+        message: formState.message,
+        date_time: new Date().toLocaleString("en-US", {
+          dateStyle: "full",
+          timeStyle: "long",
+        }),
+      }
+
+      const response = await emailjs.send(serviceId, templateId, templateParams, publicKey)
+
+      if (response.status === 200) {
+        setToast({
+          message: "Your message has been sent successfully.",
+          type: "success",
+        })
+        localStorage.setItem("emailjs_last_submit", Date.now().toString())
+        setFormState({ name: "", email: "", subject: "", message: "", honeypot: "" })
+        setErrors({ name: "", email: "", message: "" })
+      } else {
+        throw new Error("Failed to send message via EmailJS.")
+      }
+    } catch (err) {
+      console.error("Failed to send contact message:", err)
+      setToast({
+        message: "Something went wrong. Please try again.",
+        type: "error",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -153,38 +274,92 @@ export function ContactSection() {
             transition={{ duration: 0.6, ease }}
             className="lg:col-span-7 rounded-3xl border border-white/5 bg-zinc-900/10 p-6 md:p-8 shadow-2xl backdrop-blur-md"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} noValidate className="space-y-6">
               
+              {/* Honeypot field for anti-spam (hidden from visual users but accessible to bots) */}
+              <div className="absolute opacity-0 pointer-events-none -z-10 w-0 h-0 overflow-hidden" aria-hidden="true">
+                <label htmlFor="form-bot-field">Do not fill this field if you are a human</label>
+                <input
+                  id="form-bot-field"
+                  type="text"
+                  name="honeypot"
+                  value={formState.honeypot}
+                  onChange={handleInputChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Name */}
                 <div className="space-y-1.5">
                   <label htmlFor="form-name" className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">
-                    Full Name
+                    Full Name <span className="text-red-500" aria-hidden="true">*</span>
                   </label>
                   <input
                     id="form-name"
                     type="text"
-                    required
+                    name="name"
+                    aria-required="true"
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
                     value={formState.name}
-                    onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                    className="w-full rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4 text-xs text-white placeholder:text-zinc-650 focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all"
+                    onChange={handleInputChange}
+                    className={`w-full rounded-2xl bg-zinc-950/60 border p-4 text-xs text-white placeholder:text-zinc-600 outline-none transition-all duration-300 focus:ring-2
+                      ${errors.name 
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/10" 
+                        : "border-zinc-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                      }`}
                     placeholder="Enter your name"
                   />
+                  {errors.name && (
+                    <span id="name-error" className="text-[10.5px] font-semibold text-red-400 block mt-1 px-1">
+                      {errors.name}
+                    </span>
+                  )}
                 </div>
 
                 {/* Email */}
                 <div className="space-y-1.5">
                   <label htmlFor="form-email" className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">
-                    Email Address
+                    Email Address <span className="text-red-500" aria-hidden="true">*</span>
                   </label>
                   <input
                     id="form-email"
                     type="email"
-                    required
+                    name="email"
+                    aria-required="true"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "email-error" : undefined}
                     value={formState.email}
-                    onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                    className="w-full rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4 text-xs text-white placeholder:text-zinc-650 focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all"
+                    onChange={handleInputChange}
+                    className={`w-full rounded-2xl bg-zinc-950/60 border p-4 text-xs text-white placeholder:text-zinc-600 outline-none transition-all duration-300 focus:ring-2
+                      ${errors.email 
+                        ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/10" 
+                        : "border-zinc-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                      }`}
                     placeholder="Enter your email"
+                  />
+                  {errors.email && (
+                    <span id="email-error" className="text-[10.5px] font-semibold text-red-400 block mt-1 px-1">
+                      {errors.email}
+                    </span>
+                  )}
+                </div>
+
+                {/* Subject */}
+                <div className="space-y-1.5 md:col-span-2">
+                  <label htmlFor="form-subject" className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">
+                    Subject <span className="text-zinc-500 text-[9px] lowercase font-normal">(optional)</span>
+                  </label>
+                  <input
+                    id="form-subject"
+                    type="text"
+                    name="subject"
+                    value={formState.subject}
+                    onChange={handleInputChange}
+                    className="w-full rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4 text-xs text-white placeholder:text-zinc-650 focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 outline-none transition-all duration-300"
+                    placeholder="What is this regarding?"
                   />
                 </div>
               </div>
@@ -192,41 +367,51 @@ export function ContactSection() {
               {/* Message */}
               <div className="space-y-1.5">
                 <label htmlFor="form-message" className="text-[10px] text-zinc-400 uppercase tracking-widest font-bold block">
-                  Your Message
+                  Your Message <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <textarea
                   id="form-message"
-                  required
+                  name="message"
                   rows={5}
+                  aria-required="true"
+                  aria-invalid={!!errors.message}
+                  aria-describedby={errors.message ? "message-error" : undefined}
                   value={formState.message}
-                  onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                  className="w-full rounded-2xl bg-zinc-950/60 border border-zinc-800 p-4 text-xs text-white placeholder:text-zinc-650 focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20 outline-none transition-all resize-none"
+                  onChange={handleInputChange}
+                  className={`w-full rounded-2xl bg-zinc-950/60 border p-4 text-xs text-white placeholder:text-zinc-600 outline-none transition-all duration-300 resize-none focus:ring-2
+                    ${errors.message 
+                      ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/10" 
+                      : "border-zinc-800 focus:border-indigo-500/60 focus:ring-indigo-500/10"
+                    }`}
                   placeholder="Tell me about your project or opportunity..."
                 />
+                {errors.message && (
+                  <span id="message-error" className="text-[10.5px] font-semibold text-red-400 block mt-1 px-1">
+                    {errors.message}
+                  </span>
+                )}
               </div>
 
               {/* Actions & Submit */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                
-                {/* Status indicator messages */}
                 <div className="h-6 flex items-center">
-                  {isSuccess && (
-                    <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
-                      <CheckCircle2 className="h-4.5 w-4.5" /> Message sent successfully!
-                    </span>
-                  )}
+                  {/* Cooldown feedback or quick notice (optional) */}
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-3.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 border border-indigo-500/30 hover:from-indigo-500 hover:to-blue-500 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="relative overflow-hidden w-full sm:w-auto rounded-full bg-gradient-to-r from-indigo-600 to-blue-600 px-7 py-3.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 border border-indigo-500/30 hover:from-indigo-500 hover:to-blue-500 active:scale-98 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group/btn cursor-pointer"
                 >
                   {isSubmitting ? (
-                    <>Sending...</>
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Sending...</span>
+                    </>
                   ) : (
                     <>
-                      Send Message <Send className="h-3.5 w-3.5" />
+                      <span>Send Message</span>
+                      <Send className="h-3.5 w-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                     </>
                   )}
                 </button>
@@ -254,6 +439,40 @@ export function ContactSection() {
         </div>
 
       </div>
+
+      {/* Premium custom glassmorphic notifications */}
+      <AnimatePresence>
+        {toast.type && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease }}
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-950/85 p-4 shadow-2xl backdrop-blur-xl max-w-sm"
+          >
+            {toast.type === "success" ? (
+              <div className="rounded-xl bg-emerald-500/10 p-2 text-emerald-400">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+            ) : (
+              <div className="rounded-xl bg-red-500/10 p-2 text-red-400">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+            )}
+            <div className="flex-1">
+              <p className="text-xs font-bold text-white">{toast.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast({ message: "", type: null })}
+              className="text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+              aria-label="Close notification"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
