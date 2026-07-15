@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { PhoneMockup } from "@/components/phone-mockup"
 import { FloatingFlutterIcons } from "@/components/floating-flutter-icons"
-import { GithubIcon, LinkedinIcon, GmailIcon, TelegramIcon } from "@/components/social-icons"
+import { GithubIcon, LinkedinIcon, GmailIcon, TelegramIcon, WhatsappIcon } from "@/components/social-icons"
 
 const socials = [
   { 
@@ -46,9 +46,9 @@ const socials = [
     glowColor: "rgba(239, 68, 68, 0.15)"
   },
   { 
-    icon: Phone, 
-    label: "Phone", 
-    href: "tel:+201148489095",
+    icon: WhatsappIcon, 
+    label: "WhatsApp", 
+    href: "https://wa.me/201148489095",
     hoverColor: "hover:text-emerald-400 hover:border-emerald-500/30",
     glowColor: "rgba(16, 185, 129, 0.2)"
   },
