@@ -5,52 +5,19 @@ import { Sparkles, Terminal, Cpu, Database, Settings, Code, ShieldCheck } from "
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const techGroups = [
-  {
-    category: "Languages & Core",
-    icon: Cpu,
-    glow: "from-sky-500/10 to-transparent",
-    items: [
-      { name: "Dart", desc: "Strong OOP features, async/await, static types", level: "Core" },
-      { name: "Flutter", desc: "Cross-platform engine, custom rendering, animations", level: "Core" },
-      { name: "HTML & CSS", desc: "Responsive web structures, styling foundation", level: "Familiar" },
-      { name: "PHP", desc: "Server-side integration scripts, database connection", level: "Familiar" }
-    ]
-  },
-  {
-    category: "Architecture & Logic",
-    icon: Terminal,
-    glow: "from-indigo-500/10 to-transparent",
-    items: [
-      { name: "Bloc / Cubit", desc: "Clean separation of business logic and UI states", level: "Advanced" },
-      { name: "OOP Principles", desc: "Encapsulation, inheritance, modular architecture", level: "Core" },
-      { name: "Data Structures", desc: "Efficient data management, memory layouts", level: "Academic" },
-      { name: "Algorithms", desc: "Sorting, searching, computational optimization", level: "Academic" }
-    ]
-  },
-  {
-    category: "Cloud Backend & APIs",
-    icon: Database,
-    glow: "from-amber-500/10 to-transparent",
-    items: [
-      { name: "Firebase Auth", desc: "Secure OAuth flow, phone verification", level: "Advanced" },
-      { name: "Cloud Firestore", desc: "Realtime NoSQL sync, collection pipelines", level: "Advanced" },
-      { name: "REST APIs", desc: "JSON payloads mapping, HTTP verb handling", level: "Advanced" },
-      { name: "MySQL", desc: "Relational database schema structures, SQL queries", level: "Familiar" }
-    ]
-  },
-  {
-    category: "Workspace & Version Control",
-    icon: Settings,
-    glow: "from-purple-500/10 to-transparent",
-    items: [
-      { name: "Git", desc: "Branching policies, merge conflict resolutions", level: "Advanced" },
-      { name: "GitHub", desc: "Pull request workflow, automated code review", level: "Advanced" },
-      { name: "Android Studio", desc: "Gradle configurations, emulator tuning, debugging", level: "Tools" },
-      { name: "VS Code", desc: "Environment customization, formatting extensions", level: "Tools" }
-    ]
-  }
-]
+const rawTechGroups = JSON.parse(process.env.NEXT_PUBLIC_TECH_STACK_DATA || "[]");
+
+const iconMap: Record<string, any> = {
+  Cpu,
+  Terminal,
+  Database,
+  Settings
+};
+
+const techGroups = rawTechGroups.map((g: any) => ({
+  ...g,
+  icon: iconMap[g.iconName] || Code
+}));
 
 export function TechStackSection() {
   return (

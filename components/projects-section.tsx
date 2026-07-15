@@ -7,77 +7,20 @@ import { GithubIcon } from "@/components/social-icons"
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const mainProject = {
-  title: "GeoGuide",
-  subtitle: "Smart Tourism Mobile Application",
-  desc: "A flagship smart tourism application designed to revolutionize travel inside Egypt. It guides travelers through cultural attractions by integrating AI models that automatically recognize historical landmarks, schedule itineraries, and generate localized high-quality information.",
-  features: [
-    "Explore tourist attractions across Egypt by city and category",
-    "Smart search functionality across monuments and local bazaars",
-    "AI Landmark Recognition: real-time camera scanning for monuments",
-    "AI Assistant: conversational travel guide powered by LLMs",
-    "AI Trip Planning & customizable saved travel boards"
-  ],
-  tech: ["Flutter", "Dart", "Firebase", "Firestore", "REST APIs", "Bloc / Cubit", "AI Integration"],
-  images: [
-    "/geoguide/pyramids.png",
-    "/geoguide/luxor.png",
-    "/geoguide/abu-simbel.png"
-  ],
-  github: "https://github.com/ahmed01119/GeoGuide",
-  demo: "https://github.com/ahmed01119/GeoGuide"
-}
+const mainProject = JSON.parse(process.env.NEXT_PUBLIC_MAIN_PROJECT_DATA || "{}");
+const rawSecondaryProjects = JSON.parse(process.env.NEXT_PUBLIC_SECONDARY_PROJECTS_DATA || "[]");
 
-const secondaryProjects = [
-  {
-    title: "Toku Language App",
-    category: "EdTech Mobile App",
-    desc: "A gamified Japanese language learning application structured with reusable modular components and high-performance routing.",
-    features: ["Hiragana & Katakana exercises", "Real-time audio pronunciation feedback", "Reusable progress indicators"],
-    tech: ["Flutter", "Dart", "State Management"],
-    github: "https://github.com/ahmed01119/Toku-App",
-    demo: "https://github.com/ahmed01119/Toku-App",
-    customIcon: Compass,
-    accent: "text-amber-400 bg-amber-950/20 border-amber-900/30",
-    glow: "rgba(245, 158, 11, 0.1)"
-  },
-  {
-    title: "Tunes Player",
-    category: "Utility Media App",
-    desc: "A lightweight, beautiful, and native-performing audio player with high-fidelity sound management controls and gesture navigation.",
-    features: ["Background sound playback support", "Playlist queue management", "Sleek glassmorphic equalizer UI"],
-    tech: ["Flutter", "Dart", "Audio Core Player"],
-    github: "https://github.com/ahmed01119/tunes_player_app",
-    demo: "https://github.com/ahmed01119/tunes_player_app",
-    customIcon: Music,
-    accent: "text-indigo-400 bg-indigo-950/20 border-indigo-900/30",
-    glow: "rgba(99, 102, 241, 0.1)"
-  },
-  {
-    title: "Basketball Score Tracker",
-    category: "Sports Realtime App",
-    desc: "An interactive, real-time scoreboard tracker built to log basketball game statistics, scores, foul lists, and timestamps.",
-    features: ["Interactive scoring dials", "Undo logs & game stats summary", "Responsive local storage history"],
-    tech: ["Flutter", "Dart", "Local Cache Database"],
-    github: "https://github.com/ahmed01119/Basketball-App",
-    demo: "https://github.com/ahmed01119/Basketball-App",
-    customIcon: Flame,
-    accent: "text-red-400 bg-red-950/20 border-red-900/30",
-    glow: "rgba(239, 68, 68, 0.1)"
-  },
-  {
-    title: "Digital Business Card",
-    category: "Social Networking App",
-    desc: "A fully responsive profile networking card showcasing credentials, interactive social maps, and one-tap contact sharing.",
-    features: ["One-tap export contact VCF", "Social media shortcuts linking", "Dynamic QR Code generator integration"],
-    tech: ["Flutter", "Web View", "Responsive UI"],
-    github: "https://github.com/ahmed01119/BusniessCardApp",
-    demo: "https://github.com/ahmed01119/BusniessCardApp",
-    customIcon: Award,
-    accent: "text-emerald-400 bg-emerald-950/20 border-emerald-900/30",
-    glow: "rgba(16, 185, 129, 0.1)"
-  }
-]
+const iconMap: Record<string, any> = {
+  Compass,
+  Music,
+  Flame,
+  Award
+};
+
+const secondaryProjects = rawSecondaryProjects.map((p: any) => ({
+  ...p,
+  customIcon: iconMap[p.customIconName] || Star
+}));
 
 export function ProjectsSection() {
   const [activeImageIndex, setActiveImageIndex] = useState(0)

@@ -5,26 +5,7 @@ import { Sparkles, Award, FileText, CheckCircle2, ShieldCheck, Calendar } from "
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const certificates = [
-  {
-    title: "Mobile Application Using Flutter Specialized Certificate",
-    issuer: "Information Technology Institute (ITI)",
-    hours: "120 Hours Intensive specialization",
-    issueDate: "July 2024",
-    credentialId: "ITI-FLUT-88390",
-    skills: ["State Management", "REST APIs Integration", "Unit testing", "UI engineering"],
-    glow: "rgba(99,102,241,0.15)"
-  },
-  {
-    title: "Bachelor of Computer Science Certificate",
-    issuer: "Ain Shams University",
-    hours: "4 Years Academic Study",
-    issueDate: "Graduated July 2024",
-    credentialId: "ASU-CS-2024-9982",
-    skills: ["Algorithms", "OOP", "Database Management", "Software Architecture"],
-    glow: "rgba(56,189,248,0.15)"
-  }
-]
+const certificates = JSON.parse(process.env.NEXT_PUBLIC_CERTIFICATES_DATA || "[]");
 
 export function CertificatesSection() {
   return (
