@@ -5,7 +5,21 @@ import { Sparkles, Terminal, Cpu, Database, Settings, Code, ShieldCheck } from "
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const rawTechGroups = JSON.parse(process.env.NEXT_PUBLIC_TECH_STACK_DATA || "[]");
+interface TechItem {
+  name: string;
+  desc: string;
+  level: string;
+}
+
+interface TechGroup {
+  category: string;
+  glow: string;
+  iconName: string;
+  icon?: any;
+  items: TechItem[];
+}
+
+const rawTechGroups: TechGroup[] = JSON.parse(process.env.NEXT_PUBLIC_TECH_STACK_DATA || "[]");
 
 const iconMap: Record<string, any> = {
   Cpu,
@@ -14,7 +28,7 @@ const iconMap: Record<string, any> = {
   Settings
 };
 
-const techGroups = rawTechGroups.map((g: any) => ({
+const techGroups: TechGroup[] = rawTechGroups.map((g) => ({
   ...g,
   icon: iconMap[g.iconName] || Code
 }));

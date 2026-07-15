@@ -5,7 +5,17 @@ import { Sparkles, Award, FileText, CheckCircle2, ShieldCheck, Calendar } from "
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const certificates = JSON.parse(process.env.NEXT_PUBLIC_CERTIFICATES_DATA || "[]");
+interface Certificate {
+  title: string;
+  glow: string;
+  issuer: string;
+  hours: string;
+  credentialId: string;
+  issueDate: string;
+  skills: string[];
+}
+
+const certificates: Certificate[] = JSON.parse(process.env.NEXT_PUBLIC_CERTIFICATES_DATA || "[]");
 
 export function CertificatesSection() {
   return (

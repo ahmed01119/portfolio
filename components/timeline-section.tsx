@@ -5,8 +5,24 @@ import { Sparkles, Calendar, Briefcase, GraduationCap, ArrowRight, ShieldCheck }
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const experienceItems = JSON.parse(process.env.NEXT_PUBLIC_EXPERIENCE_DATA || "[]");
-const educationItems = JSON.parse(process.env.NEXT_PUBLIC_EDUCATION_DATA || "[]");
+interface ExperienceItem {
+  role: string;
+  company: string;
+  duration: string;
+  desc: string;
+  skills: string[];
+}
+
+interface EducationItem {
+  degree: string;
+  institution: string;
+  duration: string;
+  desc: string;
+  highlights: string[];
+}
+
+const experienceItems: ExperienceItem[] = JSON.parse(process.env.NEXT_PUBLIC_EXPERIENCE_DATA || "[]");
+const educationItems: EducationItem[] = JSON.parse(process.env.NEXT_PUBLIC_EDUCATION_DATA || "[]");
 
 export function TimelineSection() {
   return (

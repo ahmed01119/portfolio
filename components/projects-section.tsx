@@ -7,8 +7,34 @@ import { GithubIcon } from "@/components/social-icons"
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const mainProject = JSON.parse(process.env.NEXT_PUBLIC_MAIN_PROJECT_DATA || "{}");
-const rawSecondaryProjects = JSON.parse(process.env.NEXT_PUBLIC_SECONDARY_PROJECTS_DATA || "[]");
+interface MainProject {
+  title: string;
+  subtitle: string;
+  desc: string;
+  features: string[];
+  tech: string[];
+  images: string[];
+  github: string;
+  demo: string;
+}
+
+interface SecondaryProject {
+  title: string;
+  subtitle: string;
+  desc: string;
+  features: string[];
+  tech: string[];
+  github: string;
+  demo: string;
+  category: string;
+  accent: string;
+  glow: string;
+  customIconName: string;
+  customIcon?: any;
+}
+
+const mainProject: MainProject = JSON.parse(process.env.NEXT_PUBLIC_MAIN_PROJECT_DATA || "{}");
+const rawSecondaryProjects: SecondaryProject[] = JSON.parse(process.env.NEXT_PUBLIC_SECONDARY_PROJECTS_DATA || "[]");
 
 const iconMap: Record<string, any> = {
   Compass,
@@ -17,7 +43,7 @@ const iconMap: Record<string, any> = {
   Award
 };
 
-const secondaryProjects = rawSecondaryProjects.map((p: any) => ({
+const secondaryProjects: SecondaryProject[] = rawSecondaryProjects.map((p) => ({
   ...p,
   customIcon: iconMap[p.customIconName] || Star
 }));
