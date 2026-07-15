@@ -5,32 +5,8 @@ import { Sparkles, Calendar, Briefcase, GraduationCap, ArrowRight, ShieldCheck }
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const experienceItems = [
-  {
-    role: "Flutter Mobile Developer",
-    company: "Freelance",
-    duration: "2024 - Present",
-    desc: "Developing custom cross-platform applications for clients. Building modular widgets, implementing global state variables via Bloc/Cubit, and integrating authentication servers.",
-    skills: ["Flutter", "Dart", "Firebase", "Bloc/Cubit", "Git"]
-  },
-  {
-    role: "Mobile Using Flutter Trainee",
-    company: "Information Technology Institute (ITI)",
-    duration: "120 Hours Intensive Training",
-    desc: "Completed an intensive training program specializing in Mobile Application Development. Focused on clean widget architecture, RESTful API mapping, caching strategies, and performance debugging.",
-    skills: ["State Management", "REST APIs", "Unit Testing", "Caching", "UI Design"]
-  }
-]
-
-const educationItems = [
-  {
-    degree: "Bachelor of Computer Science",
-    institution: "Ain Shams University",
-    duration: "Graduated 2024",
-    desc: "Acquired deep understanding of computing theory, data modeling, complexity theory, and software methodologies.",
-    highlights: ["Algorithms design", "Data Structures", "OOP structures", "Database Systems (SQL)"]
-  }
-]
+const experienceItems = JSON.parse(process.env.NEXT_PUBLIC_EXPERIENCE_DATA || "[]");
+const educationItems = JSON.parse(process.env.NEXT_PUBLIC_EDUCATION_DATA || "[]");
 
 export function TimelineSection() {
   return (

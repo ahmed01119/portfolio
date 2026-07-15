@@ -7,12 +7,19 @@ import { GithubIcon, LinkedinIcon, GmailIcon, TelegramIcon } from "@/components/
 
 const ease = [0.16, 1, 0.3, 1] as const
 
-const socials = [
-  { icon: GithubIcon, label: "GitHub", href: "https://github.com" },
-  { icon: LinkedinIcon, label: "LinkedIn", href: "https://linkedin.com" },
-  { icon: GmailIcon, label: "Gmail", href: "mailto:ahmedmostafa@gmail.com" },
-  { icon: TelegramIcon, label: "Telegram", href: "https://t.me" }
-]
+const rawSocials = JSON.parse(process.env.NEXT_PUBLIC_SOCIALS_DATA || "[]");
+
+const iconMap: Record<string, any> = {
+  GithubIcon,
+  LinkedinIcon,
+  GmailIcon,
+  TelegramIcon
+};
+
+const socials = rawSocials.map((s: any) => ({
+  ...s,
+  icon: iconMap[s.iconName] || GithubIcon
+}));
 
 export function ContactSection() {
   const [formState, setFormState] = useState({ name: "", email: "", message: "" })
@@ -84,7 +91,7 @@ export function ContactSection() {
             <div className="space-y-4">
               {/* Direct email card */}
               <a 
-                href="mailto:ahmedmostafa@gmail.com" 
+                href="mailto:ahmedmost020508@gmail.com" 
                 className="flex items-center gap-4 rounded-2xl border border-white/5 bg-zinc-900/10 p-4 transition-all duration-300 hover:border-indigo-500/20 hover:bg-zinc-900/20 group"
               >
                 <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-indigo-450 group-hover:bg-indigo-500/10 group-hover:text-indigo-400 transition-colors">
@@ -92,7 +99,7 @@ export function ContactSection() {
                 </div>
                 <div>
                   <span className="text-[9.5px] text-zinc-500 font-semibold uppercase tracking-wider">Email Address</span>
-                  <p className="text-xs font-bold text-zinc-200 mt-0.5 leading-none">ahmedmostafa@gmail.com</p>
+                  <p className="text-xs font-bold text-zinc-200 mt-0.5 leading-none">ahmedmost020508@gmail.com</p>
                 </div>
               </a>
 
