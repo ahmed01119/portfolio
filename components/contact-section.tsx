@@ -130,7 +130,7 @@ export function ContactSection() {
             <div className="pt-6 space-y-3">
               <span className="text-xs uppercase tracking-wider font-bold text-zinc-500 block">Follow Professional Profiles</span>
               <div className="flex items-center gap-3">
-                {socials.map(({ icon: Icon, label, href }) => (
+                {socials.map(({ icon: Icon, label, href }: { icon: any, label: string, href: string }) => (
                   <a
                     key={label}
                     href={href}
